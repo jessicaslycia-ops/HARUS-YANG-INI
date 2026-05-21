@@ -1212,7 +1212,8 @@ function AdminSection({ adminLoggedIn, setAdminLoggedIn, adminToken, setAdminTok
           )}
 
           {adminTab === 'slots' && (
-            <div className="mb-6 p-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl">
+  <>
+    <div className="mb-6 p-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl">
               <label className="block text-sm mb-3 text-purple-200">Commission Slot Setting</label>
               <div className="flex gap-3 items-center">
                 <input
@@ -1267,6 +1268,7 @@ function AdminSection({ adminLoggedIn, setAdminLoggedIn, adminToken, setAdminTok
                 </div>
               )}
             </div>
+  </>
           )}
 
           {adminTab === 'progress' && (
