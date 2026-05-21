@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PenLine, Users, ShieldCheck, Sparkles, X, Check, Trash2, Eye, ChevronLeft, Globe, MapPin, RefreshCw, Camera, Save, Pencil, User, Lock } from 'lucide-react';
+import BorderGlow from './components/BorderGlow';
 import './index.css';
 
 type Tab = 'buy' | 'clients' | 'admin';
@@ -509,18 +510,30 @@ function BuySection({ view, setView, locale, termsText, adminLoggedIn, onTermsUp
   if (view === 'select') {
     return (
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }}>
-        <GlassCard className="rounded-3xl p-8 md:p-10">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-white" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.selectRegion}</h2>
-            <p className="text-sm text-gray-400 mt-2">Choose your region to continue</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <RegionCard icon={MapPin} title={txt.local} desc={txt.localDesc}
-              locked={localLocked} onClick={() => onRegionClick('local')} />
-            <RegionCard icon={Globe} title={txt.international} desc={txt.internationalDesc}
-              locked={internationalLocked} onClick={() => onRegionClick('international')} />
-          </div>
-        </GlassCard>
+        <BorderGlow
+          edgeSensitivity={30}
+          glowColor="40 80 80"
+          backgroundColor="#120F17"
+          borderRadius={33}
+          glowRadius={47}
+          glowIntensity={1}
+          coneSpread={25}
+          animated={false}
+          colors={['#c084fc', '#f472b6', '#38bdf8']}
+        >
+          <GlassCard className="rounded-3xl p-8 md:p-10">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl font-bold text-white" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.selectRegion}</h2>
+              <p className="text-sm text-gray-400 mt-2">Choose your region to continue</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <RegionCard icon={MapPin} title={txt.local} desc={txt.localDesc}
+                locked={localLocked} onClick={() => onRegionClick('local')} />
+              <RegionCard icon={Globe} title={txt.international} desc={txt.internationalDesc}
+                locked={internationalLocked} onClick={() => onRegionClick('international')} />
+            </div>
+          </GlassCard>
+        </BorderGlow>
       </motion.div>
     );
   }
@@ -531,44 +544,57 @@ function BuySection({ view, setView, locale, termsText, adminLoggedIn, onTermsUp
         <ChevronLeft className="w-4 h-4" /> Back
       </button>
 
-      <GlassCard className="rounded-3xl p-6 md:p-8 mb-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/12 flex items-center justify-center">
-              <ShieldCheck className="w-[18px] h-[18px] text-amber-300" />
+      <BorderGlow
+        edgeSensitivity={30}
+        glowColor="40 80 80"
+        backgroundColor="#120F17"
+        borderRadius={33}
+        glowRadius={47}
+        glowIntensity={1}
+        coneSpread={25}
+        animated={false}
+        colors={['#c084fc', '#f472b6', '#38bdf8']}
+        className="mb-6"
+      >
+        <GlassCard className="rounded-3xl p-6 md:p-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/12 flex items-center justify-center">
+                <ShieldCheck className="w-[18px] h-[18px] text-amber-300" />
+              </div>
+              <h2 className="text-lg font-bold text-white" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.conditionsTitle}</h2>
             </div>
-            <h2 className="text-lg font-bold text-white" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.conditionsTitle}</h2>
+            {adminLoggedIn && (
+              <button onClick={() => { setEditingTerms(!editingTerms); setEditText(termsText); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/12 border border-purple-400/20 text-purple-200 text-xs hover:bg-purple-500/20 transition-all">
+                <Pencil className="w-3 h-3" /> {editingTerms ? 'Cancel' : 'Edit'}
+              </button>
+            )}
           </div>
-          {adminLoggedIn && (
-            <button onClick={() => { setEditingTerms(!editingTerms); setEditText(termsText); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/12 border border-purple-400/20 text-purple-200 text-xs hover:bg-purple-500/20 transition-all">
-              <Pencil className="w-3 h-3" /> {editingTerms ? 'Cancel' : 'Edit'}
-            </button>
+          <AnimatePresence>
+            {saved && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                className="mb-4 p-3 rounded-xl bg-emerald-500/8 border border-emerald-500/20 text-emerald-300 text-sm text-center">
+                {txt.saved}
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {editingTerms && adminLoggedIn ? (
+            <div className="space-y-3">
+              <textarea value={editText} onChange={(e) => setEditText(e.target.value)} rows={18}
+                className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-purple-400/30 focus:bg-white/[0.04] transition-all backdrop-blur-sm resize-none font-mono leading-relaxed input-glow" />
+              <button onClick={saveTerms}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/15 border border-purple-400/25 text-purple-100 text-sm hover:bg-purple-500/25 transition-all">
+                <Save className="w-4 h-4" /> {txt.save}
+              </button>
+            </div>
+          ) : (
+            <div className="text-sm text-gray-300/80 whitespace-pre-wrap leading-relaxed">
+              {termsText || (locale === 'id' ? 'Syarat dan ketentuan belum ditetapkan.' : 'Terms and conditions have not been set yet.')}
+            </div>
           )}
-        </div>
-        <AnimatePresence>
-          {saved && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-              className="mb-4 p-3 rounded-xl bg-emerald-500/8 border border-emerald-500/20 text-emerald-300 text-sm text-center">
-              {txt.saved}
-            </motion.div>
-          )}
-        </AnimatePresence>
-        {editingTerms && adminLoggedIn ? (
-          <div className="space-y-3">
-            <textarea value={editText} onChange={(e) => setEditText(e.target.value)} rows={18}
-              className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-purple-400/30 focus:bg-white/[0.04] transition-all backdrop-blur-sm resize-none font-mono leading-relaxed input-glow" />
-            <button onClick={saveTerms}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/15 border border-purple-400/25 text-purple-100 text-sm hover:bg-purple-500/25 transition-all">
-              <Save className="w-4 h-4" /> {txt.save}
-            </button>
-          </div>
-        ) : (
-          <div className="text-sm text-gray-300/80 whitespace-pre-wrap leading-relaxed">
-            {termsText || (locale === 'id' ? 'Syarat dan ketentuan belum ditetapkan.' : 'Terms and conditions have not been set yet.')}
-          </div>
-        )}
-      </GlassCard>
+        </GlassCard>
+      </BorderGlow>
 
       <CommissionForm locale={locale} onSubmitted={() => {}} />
     </motion.div>
@@ -624,76 +650,88 @@ function CommissionForm({ locale, onSubmitted }: { locale: Locale; onSubmitted: 
   };
 
   return (
-    <GlassCard className="rounded-3xl p-6 md:p-10">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-9 h-9 rounded-xl bg-purple-500/12 flex items-center justify-center">
-          <PenLine className="w-[18px] h-[18px] text-purple-300" />
-        </div>
-        <div>
-          <h2 className="text-lg font-bold text-white" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.fillForm}</h2>
-          <p className="text-sm text-gray-400">{locale === 'id' ? 'Isi detail di bawah ini' : 'Fill in the details below'}</p>
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {success && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-            className="mb-6 p-4 rounded-xl bg-emerald-500/8 border border-emerald-500/20 text-emerald-300 text-sm flex items-center gap-2">
-            <Check className="w-4 h-4" /> {txt.successMsg}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <FormField label={txt.nameLabel} value={form.name} onChange={(v) => setForm({ ...form, name: v })} placeholder={locale === 'id' ? 'Contoh: @username' : 'e.g. @username'} required />
-        <FormField label={txt.refLabel} value={form.reference_link} onChange={(v) => setForm({ ...form, reference_link: v })} placeholder="https://..." />
-        <FormField label={txt.poseLabel} value={form.pose_outfit} onChange={(v) => setForm({ ...form, pose_outfit: v })} placeholder={locale === 'id' ? 'Deskripsikan pose...' : 'Describe the pose...'} textarea />
-        <FormField label={txt.notesLabel} value={form.notes} onChange={(v) => setForm({ ...form, notes: v })} placeholder={locale === 'id' ? 'Detail tambahan...' : 'Any extra details...'} textarea />
-
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-3">{txt.commissionType}</label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {(locale === 'id' ? COMMISSION_TYPES_ID : COMMISSION_TYPES_EN).map((type) => (
-              <button key={type.id} type="button" onClick={() => setForm({ ...form, commission_type: type.id })}
-                className={`relative p-4 rounded-xl border text-left transition-all duration-300 ${
-                  form.commission_type === type.id
-                    ? 'bg-purple-500/12 border-purple-400/35' : 'bg-white/[0.02] border-white/[0.06] hover:border-white/15 hover:bg-white/[0.04]'
-                }`}
-                style={form.commission_type === type.id ? { boxShadow: '0 0 20px rgba(168,85,247,0.15)' } : {}}>
-                <div className="flex items-center justify-between gap-2">
-                  <span className={`text-sm font-semibold shrink-0 ${form.commission_type === type.id ? 'text-purple-200' : 'text-gray-300'}`}>{type.label}</span>
-                  <span className={`text-base font-bold text-right tabular-nums ${form.commission_type === type.id ? 'text-purple-300' : 'text-gray-500'}`}>{type.price}</span>
-                </div>
-                {form.commission_type === type.id && (
-                  <div className="absolute top-2 right-2"><Check className="w-3.5 h-3.5 text-purple-400" /></div>
-                )}
-              </button>
-            ))}
+    <BorderGlow
+      edgeSensitivity={30}
+      glowColor="40 80 80"
+      backgroundColor="#120F17"
+      borderRadius={33}
+      glowRadius={47}
+      glowIntensity={1}
+      coneSpread={25}
+      animated={false}
+      colors={['#c084fc', '#f472b6', '#38bdf8']}
+    >
+      <GlassCard className="rounded-3xl p-6 md:p-10">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-9 h-9 rounded-xl bg-purple-500/12 flex items-center justify-center">
+            <PenLine className="w-[18px] h-[18px] text-purple-300" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-white" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.fillForm}</h2>
+            <p className="text-sm text-gray-400">{locale === 'id' ? 'Isi detail di bawah ini' : 'Fill in the details below'}</p>
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-3">{txt.contentRating}</label>
-          <div className="flex gap-5">
-            {[{ key: 'sfw', label: 'SFW', color: 'emerald' }, { key: 'nsfw', label: 'NSFW', color: 'rose' }].map((item) => (
-              <label key={item.key} className="flex items-center gap-3 cursor-pointer group">
-                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${(form as any)[item.key] ? `bg-${item.color}-500/20 border-${item.color}-400` : 'border-white/15 group-hover:border-white/25'}`}>
-                  {(form as any)[item.key] && <Check className={`w-3 h-3 text-${item.color}-300`} />}
-                </div>
-                <input type="checkbox" className="hidden" checked={(form as any)[item.key]} onChange={(e) => setForm({ ...form, [item.key]: e.target.checked } as any)} />
-                <span className="text-sm text-gray-300">{item.label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
+        <AnimatePresence>
+          {success && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+              className="mb-6 p-4 rounded-xl bg-emerald-500/8 border border-emerald-500/20 text-emerald-300 text-sm flex items-center gap-2">
+              <Check className="w-4 h-4" /> {txt.successMsg}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <button disabled={submitting || !form.name.trim() || !form.commission_type}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600/60 via-violet-600/60 to-purple-600/60 backdrop-blur-sm border border-purple-400/20 text-white font-semibold text-sm tracking-wide hover:from-purple-600 hover:via-violet-600 hover:to-purple-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{ boxShadow: '0 6px 20px rgba(168,85,247,0.2)' }}>
-          {submitting ? txt.submitting : txt.submit}
-        </button>
-      </form>
-    </GlassCard>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <FormField label={txt.nameLabel} value={form.name} onChange={(v) => setForm({ ...form, name: v })} placeholder={locale === 'id' ? 'Contoh: @username' : 'e.g. @username'} required />
+          <FormField label={txt.refLabel} value={form.reference_link} onChange={(v) => setForm({ ...form, reference_link: v })} placeholder="https://..." />
+          <FormField label={txt.poseLabel} value={form.pose_outfit} onChange={(v) => setForm({ ...form, pose_outfit: v })} placeholder={locale === 'id' ? 'Deskripsikan pose...' : 'Describe the pose...'} textarea />
+          <FormField label={txt.notesLabel} value={form.notes} onChange={(v) => setForm({ ...form, notes: v })} placeholder={locale === 'id' ? 'Detail tambahan...' : 'Any extra details...'} textarea />
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-3">{txt.commissionType}</label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {(locale === 'id' ? COMMISSION_TYPES_ID : COMMISSION_TYPES_EN).map((type) => (
+                <button key={type.id} type="button" onClick={() => setForm({ ...form, commission_type: type.id })}
+                  className={`relative p-4 rounded-xl border text-left transition-all duration-300 ${
+                    form.commission_type === type.id
+                      ? 'bg-purple-500/12 border-purple-400/35' : 'bg-white/[0.02] border-white/[0.06] hover:border-white/15 hover:bg-white/[0.04]'
+                  }`}
+                  style={form.commission_type === type.id ? { boxShadow: '0 0 20px rgba(168,85,247,0.15)' } : {}}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`text-sm font-semibold shrink-0 ${form.commission_type === type.id ? 'text-purple-200' : 'text-gray-300'}`}>{type.label}</span>
+                    <span className={`text-base font-bold text-right tabular-nums ${form.commission_type === type.id ? 'text-purple-300' : 'text-gray-500'}`}>{type.price}</span>
+                  </div>
+                  {form.commission_type === type.id && (
+                    <div className="absolute top-2 right-2"><Check className="w-3.5 h-3.5 text-purple-400" /></div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-3">{txt.contentRating}</label>
+            <div className="flex gap-5">
+              {[{ key: 'sfw', label: 'SFW', color: 'emerald' }, { key: 'nsfw', label: 'NSFW', color: 'rose' }].map((item) => (
+                <label key={item.key} className="flex items-center gap-3 cursor-pointer group">
+                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${(form as any)[item.key] ? `bg-${item.color}-500/20 border-${item.color}-400` : 'border-white/15 group-hover:border-white/25'}`}>
+                    {(form as any)[item.key] && <Check className={`w-3 h-3 text-${item.color}-300`} />}
+                  </div>
+                  <input type="checkbox" className="hidden" checked={(form as any)[item.key]} onChange={(e) => setForm({ ...form, [item.key]: e.target.checked } as any)} />
+                  <span className="text-sm text-gray-300">{item.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <button disabled={submitting || !form.name.trim() || !form.commission_type}
+            className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600/60 via-violet-600/60 to-purple-600/60 backdrop-blur-sm border border-purple-400/20 text-white font-semibold text-sm tracking-wide hover:from-purple-600 hover:via-violet-600 hover:to-purple-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ boxShadow: '0 6px 20px rgba(168,85,247,0.2)' }}>
+            {submitting ? txt.submitting : txt.submit}
+          </button>
+        </form>
+      </GlassCard>
+    </BorderGlow>
   );
 }
 
@@ -721,66 +759,78 @@ function ClientList({ commissions, loading, error, lastUpdated, onRefresh, local
   const txt = t[locale];
   return (
     <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }}>
-      <GlassCard className="rounded-3xl p-6 md:p-10">
-        <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-500/12 flex items-center justify-center">
-              <Users className="w-[18px] h-[18px] text-indigo-300" />
+      <BorderGlow
+        edgeSensitivity={30}
+        glowColor="40 80 80"
+        backgroundColor="#120F17"
+        borderRadius={33}
+        glowRadius={47}
+        glowIntensity={1}
+        coneSpread={25}
+        animated={false}
+        colors={['#c084fc', '#f472b6', '#38bdf8']}
+      >
+        <GlassCard className="rounded-3xl p-6 md:p-10">
+          <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-indigo-500/12 flex items-center justify-center">
+                <Users className="w-[18px] h-[18px] text-indigo-300" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-white" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.clientList}</h2>
+                <p className="text-sm text-gray-400">{commissions.length} {txt.clientsInQueue}</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-white" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.clientList}</h2>
-              <p className="text-sm text-gray-400">{commissions.length} {txt.clientsInQueue}</p>
+            <button onClick={onRefresh}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs text-gray-400 hover:text-white hover:bg-white/[0.06] transition-all">
+              <RefreshCw className="w-3.5 h-3.5" /> {txt.refresh}
+            </button>
+          </div>
+
+          {error && <div className="mb-4 p-3 rounded-xl bg-rose-500/8 border border-rose-500/20 text-rose-300 text-sm text-center">{txt.loadError}: {error}</div>}
+          {lastUpdated && <p className="text-[10px] text-gray-600 mb-4 text-right">{txt.lastUpdated}: {lastUpdated.toLocaleTimeString()}</p>}
+
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <div className="w-8 h-8 border-2 border-purple-400/20 border-t-purple-400 rounded-full animate-spin" />
             </div>
-          </div>
-          <button onClick={onRefresh}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs text-gray-400 hover:text-white hover:bg-white/[0.06] transition-all">
-            <RefreshCw className="w-3.5 h-3.5" /> {txt.refresh}
-          </button>
-        </div>
-
-        {error && <div className="mb-4 p-3 rounded-xl bg-rose-500/8 border border-rose-500/20 text-rose-300 text-sm text-center">{txt.loadError}: {error}</div>}
-        {lastUpdated && <p className="text-[10px] text-gray-600 mb-4 text-right">{txt.lastUpdated}: {lastUpdated.toLocaleTimeString()}</p>}
-
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="w-8 h-8 border-2 border-purple-400/20 border-t-purple-400 rounded-full animate-spin" />
-          </div>
-        ) : commissions.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
-            <p className="text-sm">{txt.noClients}</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {commissions.map((client, index) => (
-              <motion.div key={client.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: index * 0.05 }}
-                className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${
-                  client.checked ? 'bg-emerald-500/[0.02] border-emerald-500/6' : 'bg-white/[0.02] border-white/[0.04] hover:border-white/8'
-                }`}>
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold border ${
-                  client.checked ? 'bg-emerald-500/12 text-emerald-300 border-emerald-400/12' : 'bg-gradient-to-br from-purple-500/12 to-violet-500/12 text-purple-300 border-purple-400/12'
-                }`}>
-                  {client.checked ? <Check className="w-4 h-4" /> : index + 1}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-semibold truncate ${client.checked ? 'text-emerald-200/60 line-through' : 'text-white'}`}>{client.name}</p>
-                  <p className="text-xs text-gray-500">{new Date(client.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-                  {client.progress > 0 && (
-                    <div className="mt-2">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                          <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-violet-400 transition-all duration-700" style={{ width: `${client.progress}%` }} />
+          ) : commissions.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
+              <p className="text-sm">{txt.noClients}</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {commissions.map((client, index) => (
+                <motion.div key={client.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: index * 0.05 }}
+                  className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${
+                    client.checked ? 'bg-emerald-500/[0.02] border-emerald-500/6' : 'bg-white/[0.02] border-white/[0.04] hover:border-white/8'
+                  }`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold border ${
+                    client.checked ? 'bg-emerald-500/12 text-emerald-300 border-emerald-400/12' : 'bg-gradient-to-br from-purple-500/12 to-violet-500/12 text-purple-300 border-purple-400/12'
+                  }`}>
+                    {client.checked ? <Check className="w-4 h-4" /> : index + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-semibold truncate ${client.checked ? 'text-emerald-200/60 line-through' : 'text-white'}`}>{client.name}</p>
+                    <p className="text-xs text-gray-500">{new Date(client.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                    {client.progress > 0 && (
+                      <div className="mt-2">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                            <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-violet-400 transition-all duration-700" style={{ width: `${client.progress}%` }} />
+                          </div>
+                          <span className="text-[10px] text-purple-300 font-medium tabular-nums">{client.progress}%</span>
                         </div>
-                        <span className="text-[10px] text-purple-300 font-medium tabular-nums">{client.progress}%</span>
                       </div>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </GlassCard>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </GlassCard>
+      </BorderGlow>
     </motion.div>
   );
 }
@@ -879,30 +929,42 @@ function AdminSection({ adminLoggedIn, setAdminLoggedIn, adminToken, setAdminTok
   if (!adminLoggedIn) {
     return (
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }}>
-        <GlassCard className="rounded-3xl p-8 md:p-10 max-w-md mx-auto">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/12 flex items-center justify-center">
-              <ShieldCheck className="w-[18px] h-[18px] text-amber-300" />
+        <BorderGlow
+          edgeSensitivity={30}
+          glowColor="40 80 80"
+          backgroundColor="#120F17"
+          borderRadius={33}
+          glowRadius={47}
+          glowIntensity={1}
+          coneSpread={25}
+          animated={false}
+          colors={['#c084fc', '#f472b6', '#38bdf8']}
+        >
+          <GlassCard className="rounded-3xl p-8 md:p-10 max-w-md mx-auto">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/12 flex items-center justify-center">
+                <ShieldCheck className="w-[18px] h-[18px] text-amber-300" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-white" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.adminLogin}</h2>
+                <p className="text-sm text-gray-400">Enter your password to access the admin panel</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-white" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.adminLogin}</h2>
-              <p className="text-sm text-gray-400">Enter your password to access the admin panel</p>
-            </div>
-          </div>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">{txt.password}</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={txt.enterPassword}
-                className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-white placeholder-gray-600 text-sm focus:outline-none focus:border-amber-400/25 focus:bg-white/[0.04] transition-all backdrop-blur-sm input-glow" />
-            </div>
-            {loginError && <p className="text-sm text-rose-400">{loginError}</p>}
-            <button disabled={loggingIn || !password}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-600/60 to-orange-600/60 backdrop-blur-sm border border-amber-400/20 text-white font-semibold text-sm tracking-wide hover:from-amber-600 hover:to-orange-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ boxShadow: '0 6px 20px rgba(245,158,11,0.15)' }}>
-              {loggingIn ? txt.loggingIn : txt.login}
-            </button>
-          </form>
-        </GlassCard>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">{txt.password}</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={txt.enterPassword}
+                  className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-white placeholder-gray-600 text-sm focus:outline-none focus:border-amber-400/25 focus:bg-white/[0.04] transition-all backdrop-blur-sm input-glow" />
+              </div>
+              {loginError && <p className="text-sm text-rose-400">{loginError}</p>}
+              <button disabled={loggingIn || !password}
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-600/60 to-orange-600/60 backdrop-blur-sm border border-amber-400/20 text-white font-semibold text-sm tracking-wide hover:from-amber-600 hover:to-orange-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ boxShadow: '0 6px 20px rgba(245,158,11,0.15)' }}>
+                {loggingIn ? txt.loggingIn : txt.login}
+              </button>
+            </form>
+          </GlassCard>
+        </BorderGlow>
       </motion.div>
     );
   }
@@ -910,36 +972,48 @@ function AdminSection({ adminLoggedIn, setAdminLoggedIn, adminToken, setAdminTok
   if (progressClient) {
     return (
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }}>
-        <GlassCard className="rounded-3xl p-6 md:p-10">
-          <button onClick={() => setProgressClient(null)} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-6 px-2 py-1 rounded-lg hover:bg-white/5">
-            <ChevronLeft className="w-4 h-4" /> {txt.backToList}
-          </button>
-          <div className="text-center mb-8">
-            <h2 className="text-xl font-bold text-white mb-2" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.clientProgress}</h2>
-            <p className="text-sm text-gray-400">{progressClient.name}</p>
-          </div>
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-gray-300">{txt.progress}</span>
-              <span className="text-2xl font-bold text-purple-300 tabular-nums">{progressValue}%</span>
+        <BorderGlow
+          edgeSensitivity={30}
+          glowColor="40 80 80"
+          backgroundColor="#120F17"
+          borderRadius={33}
+          glowRadius={47}
+          glowIntensity={1}
+          coneSpread={25}
+          animated={false}
+          colors={['#c084fc', '#f472b6', '#38bdf8']}
+        >
+          <GlassCard className="rounded-3xl p-6 md:p-10">
+            <button onClick={() => setProgressClient(null)} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-6 px-2 py-1 rounded-lg hover:bg-white/5">
+              <ChevronLeft className="w-4 h-4" /> {txt.backToList}
+            </button>
+            <div className="text-center mb-8">
+              <h2 className="text-xl font-bold text-white mb-2" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.clientProgress}</h2>
+              <p className="text-sm text-gray-400">{progressClient.name}</p>
             </div>
-            <div className="relative h-3 rounded-full bg-white/[0.06] overflow-hidden mb-6">
-              <motion.div className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-purple-500 via-violet-400 to-purple-300"
-                animate={{ width: `${progressValue}%` }} transition={{ duration: 0.3 }} />
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-gray-300">{txt.progress}</span>
+                <span className="text-2xl font-bold text-purple-300 tabular-nums">{progressValue}%</span>
+              </div>
+              <div className="relative h-3 rounded-full bg-white/[0.06] overflow-hidden mb-6">
+                <motion.div className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-purple-500 via-violet-400 to-purple-300"
+                  animate={{ width: `${progressValue}%` }} transition={{ duration: 0.3 }} />
+              </div>
+              <input type="range" min="0" max="100" value={progressValue} onChange={(e) => setProgressValue(Number(e.target.value))} className="w-full mb-6" />
+              <div className="flex gap-3">
+                <button onClick={() => { updateProgress(progressClient.id, progressValue); setProgressClient(null); }}
+                  className="flex-1 py-3 rounded-xl bg-purple-500/15 border border-purple-400/25 text-purple-100 text-sm font-medium hover:bg-purple-500/25 transition-all">
+                  {txt.save}
+                </button>
+                <button onClick={() => setProgressClient(null)}
+                  className="px-5 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-gray-400 text-sm hover:bg-white/[0.06] hover:text-white transition-all">
+                  Cancel
+                </button>
+              </div>
             </div>
-            <input type="range" min="0" max="100" value={progressValue} onChange={(e) => setProgressValue(Number(e.target.value))} className="w-full mb-6" />
-            <div className="flex gap-3">
-              <button onClick={() => { updateProgress(progressClient.id, progressValue); setProgressClient(null); }}
-                className="flex-1 py-3 rounded-xl bg-purple-500/15 border border-purple-400/25 text-purple-100 text-sm font-medium hover:bg-purple-500/25 transition-all">
-                {txt.save}
-              </button>
-              <button onClick={() => setProgressClient(null)}
-                className="px-5 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-gray-400 text-sm hover:bg-white/[0.06] hover:text-white transition-all">
-                Cancel
-              </button>
-            </div>
-          </div>
-        </GlassCard>
+          </GlassCard>
+        </BorderGlow>
       </motion.div>
     );
   }
@@ -950,47 +1024,59 @@ function AdminSection({ adminLoggedIn, setAdminLoggedIn, adminToken, setAdminTok
     const cleanNotes = selectedClient.notes.replace(/\n\n\[COMMISSION TYPE\].+/, '');
     return (
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }}>
-        <GlassCard className="rounded-3xl p-6 md:p-10">
-          <button onClick={() => setSelectedClient(null)} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-6 px-2 py-1 rounded-lg hover:bg-white/5">
-            <ChevronLeft className="w-4 h-4" /> {txt.backToList}
-          </button>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-white" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.clientDetails}</h2>
-            <button onClick={() => deleteClient(selectedClient.id)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-500/8 border border-rose-500/12 text-rose-300 text-xs hover:bg-rose-500/15 transition-all">
-              <Trash2 className="w-3 h-3" /> {txt.delete}
+        <BorderGlow
+          edgeSensitivity={30}
+          glowColor="40 80 80"
+          backgroundColor="#120F17"
+          borderRadius={33}
+          glowRadius={47}
+          glowIntensity={1}
+          coneSpread={25}
+          animated={false}
+          colors={['#c084fc', '#f472b6', '#38bdf8']}
+        >
+          <GlassCard className="rounded-3xl p-6 md:p-10">
+            <button onClick={() => setSelectedClient(null)} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-6 px-2 py-1 rounded-lg hover:bg-white/5">
+              <ChevronLeft className="w-4 h-4" /> {txt.backToList}
             </button>
-          </div>
-          <div className="space-y-5">
-            <DetailRow label="Name / Username" value={selectedClient.name} />
-            {commissionType && <DetailRow label="Commission Type" value={commissionType} />}
-            <DetailRow label="Character References" value={selectedClient.reference_link} isLink />
-            <DetailRow label="Pose / Outfit" value={selectedClient.pose_outfit} />
-            <DetailRow label="Additional Notes" value={cleanNotes} />
-            <div className="space-y-2">
-              <p className="text-xs text-gray-500 uppercase tracking-wider">{txt.progress}</p>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-2 rounded-full bg-white/[0.06] overflow-hidden">
-                  <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-violet-400 transition-all duration-500" style={{ width: `${selectedClient.progress || 0}%` }} />
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold text-white" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.clientDetails}</h2>
+              <button onClick={() => deleteClient(selectedClient.id)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-500/8 border border-rose-500/12 text-rose-300 text-xs hover:bg-rose-500/15 transition-all">
+                <Trash2 className="w-3 h-3" /> {txt.delete}
+              </button>
+            </div>
+            <div className="space-y-5">
+              <DetailRow label="Name / Username" value={selectedClient.name} />
+              {commissionType && <DetailRow label="Commission Type" value={commissionType} />}
+              <DetailRow label="Character References" value={selectedClient.reference_link} isLink />
+              <DetailRow label="Pose / Outfit" value={selectedClient.pose_outfit} />
+              <DetailRow label="Additional Notes" value={cleanNotes} />
+              <div className="space-y-2">
+                <p className="text-xs text-gray-500 uppercase tracking-wider">{txt.progress}</p>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-2 rounded-full bg-white/[0.06] overflow-hidden">
+                    <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-violet-400 transition-all duration-500" style={{ width: `${selectedClient.progress || 0}%` }} />
+                  </div>
+                  <span className="text-sm font-bold text-purple-300 tabular-nums">{selectedClient.progress || 0}%</span>
                 </div>
-                <span className="text-sm font-bold text-purple-300 tabular-nums">{selectedClient.progress || 0}%</span>
+              </div>
+              <div className="flex gap-3 pt-2">
+                {selectedClient.sfw && <span className="px-3 py-1 rounded-lg bg-emerald-500/8 border border-emerald-500/12 text-xs text-emerald-300 font-medium">SFW</span>}
+                {selectedClient.nsfw && <span className="px-3 py-1 rounded-lg bg-rose-500/8 border border-rose-500/12 text-xs text-rose-300 font-medium">NSFW</span>}
+              </div>
+              <div className="pt-4 border-t border-white/[0.04]">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <div onClick={() => toggleChecked(selectedClient)}
+                    className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all cursor-pointer ${selectedClient.checked ? 'bg-purple-500/20 border-purple-400' : 'border-white/12 hover:border-white/25'}`}>
+                    {selectedClient.checked && <Check className="w-4 h-4 text-purple-300" />}
+                  </div>
+                  <span className="text-sm text-gray-300">{selectedClient.checked ? txt.checked : txt.markChecked}</span>
+                </label>
               </div>
             </div>
-            <div className="flex gap-3 pt-2">
-              {selectedClient.sfw && <span className="px-3 py-1 rounded-lg bg-emerald-500/8 border border-emerald-500/12 text-xs text-emerald-300 font-medium">SFW</span>}
-              {selectedClient.nsfw && <span className="px-3 py-1 rounded-lg bg-rose-500/8 border border-rose-500/12 text-xs text-rose-300 font-medium">NSFW</span>}
-            </div>
-            <div className="pt-4 border-t border-white/[0.04]">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <div onClick={() => toggleChecked(selectedClient)}
-                  className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all cursor-pointer ${selectedClient.checked ? 'bg-purple-500/20 border-purple-400' : 'border-white/12 hover:border-white/25'}`}>
-                  {selectedClient.checked && <Check className="w-4 h-4 text-purple-300" />}
-                </div>
-                <span className="text-sm text-gray-300">{selectedClient.checked ? txt.checked : txt.markChecked}</span>
-              </label>
-            </div>
-          </div>
-        </GlassCard>
+          </GlassCard>
+        </BorderGlow>
       </motion.div>
     );
   }
@@ -999,240 +1085,252 @@ function AdminSection({ adminLoggedIn, setAdminLoggedIn, adminToken, setAdminTok
 
   return (
     <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }}>
-      <GlassCard className="rounded-3xl p-6 md:p-10">
-        <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/12 flex items-center justify-center">
-              <ShieldCheck className="w-[18px] h-[18px] text-amber-300" />
+      <BorderGlow
+        edgeSensitivity={30}
+        glowColor="40 80 80"
+        backgroundColor="#120F17"
+        borderRadius={33}
+        glowRadius={47}
+        glowIntensity={1}
+        coneSpread={25}
+        animated={false}
+        colors={['#c084fc', '#f472b6', '#38bdf8']}
+      >
+        <GlassCard className="rounded-3xl p-6 md:p-10">
+          <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/12 flex items-center justify-center">
+                <ShieldCheck className="w-[18px] h-[18px] text-amber-300" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-white" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.adminPanel}</h2>
+                <p className="text-sm text-gray-400">{txt.manageClients}</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-white" style={{ textShadow: '0 0 15px rgba(168,85,247,0.15)' }}>{txt.adminPanel}</h2>
-              <p className="text-sm text-gray-400">{txt.manageClients}</p>
+            <div className="flex items-center gap-2">
+              <button onClick={onRefresh}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs text-gray-400 hover:text-white hover:bg-white/[0.06] transition-all">
+                <RefreshCw className="w-3.5 h-3.5" /> {txt.refresh}
+              </button>
+              <button onClick={handleLogout}
+                className="px-4 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs text-gray-400 hover:text-white hover:bg-white/[0.06] transition-all">
+                {txt.logout}
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={onRefresh}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs text-gray-400 hover:text-white hover:bg-white/[0.06] transition-all">
-              <RefreshCw className="w-3.5 h-3.5" /> {txt.refresh}
-            </button>
-            <button onClick={handleLogout}
-              className="px-4 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs text-gray-400 hover:text-white hover:bg-white/[0.06] transition-all">
-              {txt.logout}
-            </button>
+
+          {error && <div className="mb-4 p-3 rounded-xl bg-rose-500/8 border border-rose-500/20 text-rose-300 text-sm text-center">{txt.loadError}: {error}</div>}
+          {lastUpdated && <p className="text-[10px] text-gray-600 mb-4 text-right">{txt.lastUpdated}: {lastUpdated.toLocaleTimeString()}</p>}
+
+          <div className="flex gap-3 mb-6 flex-wrap">
+            {[
+              { key: 'clients' as const, label: 'Clients' },
+              { key: 'slots' as const, label: `Slots (${acceptedCount}/${MAX_SLOTS})` },
+              { key: 'progress' as const, label: 'Progress' },
+              { key: 'terms' as const, label: 'Terms' },
+              { key: 'profile' as const, label: 'Profile' },
+            ].map((tab) => (
+              <button key={tab.key} onClick={() => setAdminTab(tab.key)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                  adminTab === tab.key
+                    ? 'bg-purple-500/12 border border-purple-400/25 text-purple-100'
+                    : 'bg-white/[0.02] border border-white/[0.05] text-gray-400 hover:text-white hover:bg-white/[0.05] hover:border-white/12'
+                }`}>
+                {tab.label}
+              </button>
+            ))}
           </div>
-        </div>
 
-        {error && <div className="mb-4 p-3 rounded-xl bg-rose-500/8 border border-rose-500/20 text-rose-300 text-sm text-center">{txt.loadError}: {error}</div>}
-        {lastUpdated && <p className="text-[10px] text-gray-600 mb-4 text-right">{txt.lastUpdated}: {lastUpdated.toLocaleTimeString()}</p>}
+          {adminTab === 'clients' && (
+            <>
+              {loading ? (
+                <div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-amber-400/20 border-t-amber-400 rounded-full animate-spin" /></div>
+              ) : commissions.length === 0 ? (
+                <div className="text-center py-12 text-gray-500"><Users className="w-12 h-12 mx-auto mb-3 opacity-20" /><p className="text-sm">No clients yet.</p></div>
+              ) : (
+                <div className="space-y-3">
+                  {commissions.map((client, index) => (
+                    <motion.div key={client.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: index * 0.05 }}
+                      className={`flex items-center gap-4 p-4 rounded-2xl border transition-all cursor-pointer ${client.checked ? 'bg-emerald-500/[0.02] border-emerald-500/6' : 'bg-white/[0.02] border-white/[0.04] hover:border-white/8'}`}
+                      onClick={() => setSelectedClient(client)}>
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold border ${client.checked ? 'bg-emerald-500/12 text-emerald-300 border-emerald-400/12' : 'bg-gradient-to-br from-purple-500/12 to-violet-500/12 text-purple-300 border-purple-400/12'}`}>
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-semibold truncate ${client.checked ? 'text-emerald-200/60 line-through' : 'text-white'}`}>{client.name}</p>
+                        <p className="text-xs text-gray-500">{new Date(client.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {client.sfw && <span className="px-2 py-0.5 rounded-md bg-emerald-500/8 border border-emerald-500/10 text-[10px] text-emerald-300">SFW</span>}
+                        {client.nsfw && <span className="px-2 py-0.5 rounded-md bg-rose-500/8 border border-rose-500/10 text-[10px] text-rose-300">NSFW</span>}
+                        <button onClick={(e) => { e.stopPropagation(); toggleChecked(client); }}
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${client.checked ? 'bg-emerald-500/12 text-emerald-300' : 'bg-white/[0.03] text-gray-500 hover:bg-white/[0.06] hover:text-white'}`}>
+                          {client.checked ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); setSelectedClient(client); }}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/[0.03] text-gray-500 hover:bg-white/[0.06] hover:text-white transition-all">
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
 
-        <div className="flex gap-3 mb-6 flex-wrap">
-          {[
-            { key: 'clients' as const, label: 'Clients' },
-            { key: 'slots' as const, label: `Slots (${acceptedCount}/${MAX_SLOTS})` },
-            { key: 'progress' as const, label: 'Progress' },
-            { key: 'terms' as const, label: 'Terms' },
-            { key: 'profile' as const, label: 'Profile' },
-          ].map((tab) => (
-            <button key={tab.key} onClick={() => setAdminTab(tab.key)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
-                adminTab === tab.key
-                  ? 'bg-purple-500/12 border border-purple-400/25 text-purple-100'
-                  : 'bg-white/[0.02] border border-white/[0.05] text-gray-400 hover:text-white hover:bg-white/[0.05] hover:border-white/12'
-              }`}>
-              {tab.label}
-            </button>
-          ))}
-        </div>
+          {adminTab === 'slots' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-purple-200">Accepted Clients ({acceptedCount}/{MAX_SLOTS})</h3>
+                <div className="flex-1 mx-4 h-2 rounded-full bg-white/[0.06] overflow-hidden">
+                  <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-violet-400" style={{ width: `${(acceptedCount / MAX_SLOTS) * 100}%` }} />
+                </div>
+                <span className="text-sm font-bold text-purple-300 tabular-nums">{Math.round((acceptedCount / MAX_SLOTS) * 100)}%</span>
+              </div>
+              {commissions.length === 0 ? (
+                <div className="text-center py-8 text-gray-500"><p className="text-sm">No clients yet.</p></div>
+              ) : (
+                <div className="space-y-2">
+                  {commissions.map((client, index) => (
+                    <div key={client.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                      <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-xs font-bold text-purple-300 border border-purple-400/10">
+                        {index + 1}
+                      </div>
+                      <p className="text-sm text-white flex-1 truncate">{client.name}</p>
+                      <button onClick={() => toggleAccepted(client)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                          client.accepted
+                            ? 'bg-emerald-500/12 border border-emerald-400/25 text-emerald-200'
+                            : 'bg-white/[0.03] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.06]'
+                        }`}>
+                        {client.accepted ? 'Accepted' : 'Accept'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
-        {adminTab === 'clients' && (
-          <>
-            {loading ? (
-              <div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-amber-400/20 border-t-amber-400 rounded-full animate-spin" /></div>
-            ) : commissions.length === 0 ? (
-              <div className="text-center py-12 text-gray-500"><Users className="w-12 h-12 mx-auto mb-3 opacity-20" /><p className="text-sm">No clients yet.</p></div>
-            ) : (
+          {adminTab === 'progress' && (
+            <>
+              {loading ? (
+                <div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-purple-400/20 border-t-purple-400 rounded-full animate-spin" /></div>
+              ) : commissions.length === 0 ? (
+                <div className="text-center py-12 text-gray-500"><Users className="w-12 h-12 mx-auto mb-3 opacity-20" /><p className="text-sm">No clients yet.</p></div>
+              ) : (
+                <div className="space-y-4">
+                  {commissions.map((client, index) => (
+                    <div key={client.id} className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.04]">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-purple-500/12 flex items-center justify-center text-xs font-bold text-purple-300 border border-purple-400/12">
+                            {index + 1}
+                          </div>
+                          <p className="text-sm font-semibold text-white">{client.name}</p>
+                        </div>
+                        <button onClick={() => { setProgressClient(client); setProgressValue(client.progress || 0); }}
+                          className="px-3 py-1.5 rounded-lg bg-purple-500/12 border border-purple-400/20 text-purple-200 text-xs hover:bg-purple-500/20 transition-all">
+                          Edit
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-2 rounded-full bg-white/[0.06] overflow-hidden">
+                          <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-violet-400 transition-all duration-500" style={{ width: `${client.progress || 0}%` }} />
+                        </div>
+                        <span className="text-sm font-bold text-purple-300 tabular-nums w-10 text-right">{client.progress || 0}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {adminTab === 'terms' && (
+            <div className="space-y-6">
+              {termsSaved && <div className="p-3 rounded-xl bg-emerald-500/8 border border-emerald-500/20 text-emerald-300 text-sm text-center">{txt.saved}</div>}
               <div className="space-y-3">
-                {commissions.map((client, index) => (
-                  <motion.div key={client.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: index * 0.05 }}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border transition-all cursor-pointer ${client.checked ? 'bg-emerald-500/[0.02] border-emerald-500/6' : 'bg-white/[0.02] border-white/[0.04] hover:border-white/8'}`}
-                    onClick={() => setSelectedClient(client)}>
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold border ${client.checked ? 'bg-emerald-500/12 text-emerald-300 border-emerald-400/12' : 'bg-gradient-to-br from-purple-500/12 to-violet-500/12 text-purple-300 border-purple-400/12'}`}>
-                      {index + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-semibold truncate ${client.checked ? 'text-emerald-200/60 line-through' : 'text-white'}`}>{client.name}</p>
-                      <p className="text-xs text-gray-500">{new Date(client.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {client.sfw && <span className="px-2 py-0.5 rounded-md bg-emerald-500/8 border border-emerald-500/10 text-[10px] text-emerald-300">SFW</span>}
-                      {client.nsfw && <span className="px-2 py-0.5 rounded-md bg-rose-500/8 border border-rose-500/10 text-[10px] text-rose-300">NSFW</span>}
-                      <button onClick={(e) => { e.stopPropagation(); toggleChecked(client); }}
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${client.checked ? 'bg-emerald-500/12 text-emerald-300' : 'bg-white/[0.03] text-gray-500 hover:bg-white/[0.06] hover:text-white'}`}>
-                        {client.checked ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                      </button>
-                      <button onClick={(e) => { e.stopPropagation(); setSelectedClient(client); }}
-                        className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/[0.03] text-gray-500 hover:bg-white/[0.06] hover:text-white transition-all">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </motion.div>
-                ))}
+                <h3 className="text-sm font-bold text-blue-200 flex items-center gap-2"><Globe className="w-4 h-4" /> {txt.termsEditorEn}</h3>
+                <textarea value={editTermsEn} onChange={(e) => setEditTermsEn(e.target.value)} rows={12}
+                  className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-white text-sm focus:outline-none focus:border-blue-400/25 focus:bg-white/[0.04] transition-all backdrop-blur-sm resize-none font-mono leading-relaxed input-glow" />
+                <button onClick={() => saveTerms('en')}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/12 border border-blue-400/20 text-blue-200 text-sm hover:bg-blue-500/20 transition-all">
+                  <Save className="w-4 h-4" /> {txt.save} (English)
+                </button>
               </div>
-            )}
-          </>
-        )}
-
-        {adminTab === 'slots' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-purple-200">Accepted Clients ({acceptedCount}/{MAX_SLOTS})</h3>
-              <div className="flex-1 mx-4 h-2 rounded-full bg-white/[0.06] overflow-hidden">
-                <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-violet-400" style={{ width: `${(acceptedCount / MAX_SLOTS) * 100}%` }} />
+              <div className="h-[1px] bg-white/[0.04]" />
+              <div className="space-y-3">
+                <h3 className="text-sm font-bold text-emerald-200 flex items-center gap-2"><MapPin className="w-4 h-4" /> {txt.termsEditorId}</h3>
+                <textarea value={editTermsId} onChange={(e) => setEditTermsId(e.target.value)} rows={12}
+                  className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-white text-sm focus:outline-none focus:border-emerald-400/25 focus:bg-white/[0.04] transition-all backdrop-blur-sm resize-none font-mono leading-relaxed input-glow" />
+                <button onClick={() => saveTerms('id')}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/12 border border-emerald-400/20 text-emerald-200 text-sm hover:bg-emerald-500/20 transition-all">
+                  <Save className="w-4 h-4" /> {txt.save} (Indonesian)
+                </button>
               </div>
-              <span className="text-sm font-bold text-purple-300 tabular-nums">{Math.round((acceptedCount / MAX_SLOTS) * 100)}%</span>
             </div>
-            {commissions.length === 0 ? (
-              <div className="text-center py-8 text-gray-500"><p className="text-sm">No clients yet.</p></div>
-            ) : (
-              <div className="space-y-2">
-                {commissions.map((client, index) => (
-                  <div key={client.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-                    <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-xs font-bold text-purple-300 border border-purple-400/10">
-                      {index + 1}
-                    </div>
-                    <p className="text-sm text-white flex-1 truncate">{client.name}</p>
-                    <button onClick={() => toggleAccepted(client)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                        client.accepted
-                          ? 'bg-emerald-500/12 border border-emerald-400/25 text-emerald-200'
-                          : 'bg-white/[0.03] border border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.06]'
-                      }`}>
-                      {client.accepted ? 'Accepted' : 'Accept'}
+          )}
+
+          {adminTab === 'profile' && (
+            <div className="space-y-6">
+              {photoSaved && <div className="p-3 rounded-xl bg-emerald-500/8 border border-emerald-500/20 text-emerald-300 text-sm text-center">{txt.saved}</div>}
+              <div className="flex flex-col items-center gap-5">
+                <div className="w-24 h-24 rounded-full overflow-hidden border-[2px] border-purple-400/35 shadow-[0_0_30px_rgba(168,85,247,0.25)] bg-[#0a0a0f] flex items-center justify-center breathe-glow profile-pulse">
+                  {photoUrl ? (
+                    <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  ) : (
+                    <User className="w-10 h-10 text-purple-400/50" />
+                  )}
+                </div>
+                <div className="w-full space-y-3 max-w-md">
+                  <label className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-sm text-gray-300 hover:bg-white/[0.06] hover:text-white transition-all cursor-pointer">
+                    <Camera className="w-4 h-4" /> {txt.uploadPhoto}
+                    <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+                  </label>
+                  <div className="flex gap-2">
+                    <input type="text" value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} placeholder={txt.photoUrl}
+                      className="flex-1 px-4 py-2 rounded-xl bg-white/[0.02] border border-white/[0.06] text-white text-sm placeholder-gray-600 focus:outline-none focus:border-purple-400/25 input-glow" />
+                    <button onClick={savePhoto}
+                      className="px-4 py-2 rounded-xl bg-purple-500/12 border border-purple-400/20 text-purple-200 hover:bg-purple-500/20 transition-all">
+                      <Save className="w-4 h-4" />
                     </button>
                   </div>
-                ))}
+                </div>
               </div>
-            )}
-          </div>
-        )}
 
-        {adminTab === 'progress' && (
-          <>
-            {loading ? (
-              <div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-purple-400/20 border-t-purple-400 rounded-full animate-spin" /></div>
-            ) : commissions.length === 0 ? (
-              <div className="text-center py-12 text-gray-500"><Users className="w-12 h-12 mx-auto mb-3 opacity-20" /><p className="text-sm">No clients yet.</p></div>
-            ) : (
-              <div className="space-y-4">
-                {commissions.map((client, index) => (
-                  <div key={client.id} className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.04]">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-purple-500/12 flex items-center justify-center text-xs font-bold text-purple-300 border border-purple-400/12">
-                          {index + 1}
-                        </div>
-                        <p className="text-sm font-semibold text-white">{client.name}</p>
-                      </div>
-                      <button onClick={() => { setProgressClient(client); setProgressValue(client.progress || 0); }}
-                        className="px-3 py-1.5 rounded-lg bg-purple-500/12 border border-purple-400/20 text-purple-200 text-xs hover:bg-purple-500/20 transition-all">
-                        Edit
-                      </button>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1 h-2 rounded-full bg-white/[0.06] overflow-hidden">
-                        <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-violet-400 transition-all duration-500" style={{ width: `${client.progress || 0}%` }} />
-                      </div>
-                      <span className="text-sm font-bold text-purple-300 tabular-nums w-10 text-right">{client.progress || 0}%</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
+              <div className="h-[1px] bg-white/[0.04]" />
 
-        {adminTab === 'terms' && (
-          <div className="space-y-6">
-            {termsSaved && <div className="p-3 rounded-xl bg-emerald-500/8 border border-emerald-500/20 text-emerald-300 text-sm text-center">{txt.saved}</div>}
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-blue-200 flex items-center gap-2"><Globe className="w-4 h-4" /> {txt.termsEditorEn}</h3>
-              <textarea value={editTermsEn} onChange={(e) => setEditTermsEn(e.target.value)} rows={12}
-                className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-white text-sm focus:outline-none focus:border-blue-400/25 focus:bg-white/[0.04] transition-all backdrop-blur-sm resize-none font-mono leading-relaxed input-glow" />
-              <button onClick={() => saveTerms('en')}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/12 border border-blue-400/20 text-blue-200 text-sm hover:bg-blue-500/20 transition-all">
-                <Save className="w-4 h-4" /> {txt.save} (English)
-              </button>
-            </div>
-            <div className="h-[1px] bg-white/[0.04]" />
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-emerald-200 flex items-center gap-2"><MapPin className="w-4 h-4" /> {txt.termsEditorId}</h3>
-              <textarea value={editTermsId} onChange={(e) => setEditTermsId(e.target.value)} rows={12}
-                className="w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-white text-sm focus:outline-none focus:border-emerald-400/25 focus:bg-white/[0.04] transition-all backdrop-blur-sm resize-none font-mono leading-relaxed input-glow" />
-              <button onClick={() => saveTerms('id')}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/12 border border-emerald-400/20 text-emerald-200 text-sm hover:bg-emerald-500/20 transition-all">
-                <Save className="w-4 h-4" /> {txt.save} (Indonesian)
-              </button>
-            </div>
-          </div>
-        )}
-
-        {adminTab === 'profile' && (
-          <div className="space-y-6">
-            {photoSaved && <div className="p-3 rounded-xl bg-emerald-500/8 border border-emerald-500/20 text-emerald-300 text-sm text-center">{txt.saved}</div>}
-            <div className="flex flex-col items-center gap-5">
-              <div className="w-24 h-24 rounded-full overflow-hidden border-[2px] border-purple-400/35 shadow-[0_0_30px_rgba(168,85,247,0.25)] bg-[#0a0a0f] flex items-center justify-center breathe-glow profile-pulse">
-                {photoUrl ? (
-                  <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                ) : (
-                  <User className="w-10 h-10 text-purple-400/50" />
-                )}
-              </div>
-              <div className="w-full space-y-3 max-w-md">
-                <label className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-sm text-gray-300 hover:bg-white/[0.06] hover:text-white transition-all cursor-pointer">
-                  <Camera className="w-4 h-4" /> {txt.uploadPhoto}
-                  <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
-                </label>
-                <div className="flex gap-2">
-                  <input type="text" value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} placeholder={txt.photoUrl}
-                    className="flex-1 px-4 py-2 rounded-xl bg-white/[0.02] border border-white/[0.06] text-white text-sm placeholder-gray-600 focus:outline-none focus:border-purple-400/25 input-glow" />
-                  <button onClick={savePhoto}
-                    className="px-4 py-2 rounded-xl bg-purple-500/12 border border-purple-400/20 text-purple-200 hover:bg-purple-500/20 transition-all">
+              {/* Lock Toggle */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-bold text-red-200">Region Locks</h3>
+                {lockSaved && <div className="p-3 rounded-xl bg-emerald-500/8 border border-emerald-500/20 text-emerald-300 text-sm text-center">{txt.saved}</div>}
+                <div className="flex flex-wrap gap-3">
+                  <button onClick={() => setLocalLockOn(!localLockOn)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      localLockOn ? 'bg-red-500/12 border border-red-400/25 text-red-200' : 'bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white'
+                    }`}>
+                    <Lock className="w-4 h-4" />
+                    {txt.lockLocal}: {localLockOn ? txt.locked : txt.unlocked}
+                  </button>
+                  <button onClick={() => setIntlLockOn(!intlLockOn)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      intlLockOn ? 'bg-red-500/12 border border-red-400/25 text-red-200' : 'bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white'
+                    }`}>
+                    <Lock className="w-4 h-4" />
+                    {txt.lockInternational}: {intlLockOn ? txt.locked : txt.unlocked}
+                  </button>
+                  <button onClick={saveLocks}
+                    className="px-4 py-2 rounded-xl bg-purple-500/12 border border-purple-400/20 text-purple-200 text-sm hover:bg-purple-500/20 transition-all">
                     <Save className="w-4 h-4" />
                   </button>
                 </div>
               </div>
             </div>
-
-            <div className="h-[1px] bg-white/[0.04]" />
-
-            {/* Lock Toggle */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-red-200">Region Locks</h3>
-              {lockSaved && <div className="p-3 rounded-xl bg-emerald-500/8 border border-emerald-500/20 text-emerald-300 text-sm text-center">{txt.saved}</div>}
-              <div className="flex flex-wrap gap-3">
-                <button onClick={() => setLocalLockOn(!localLockOn)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                    localLockOn ? 'bg-red-500/12 border border-red-400/25 text-red-200' : 'bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white'
-                  }`}>
-                  <Lock className="w-4 h-4" />
-                  {txt.lockLocal}: {localLockOn ? txt.locked : txt.unlocked}
-                </button>
-                <button onClick={() => setIntlLockOn(!intlLockOn)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                    intlLockOn ? 'bg-red-500/12 border border-red-400/25 text-red-200' : 'bg-white/[0.02] border border-white/[0.06] text-gray-400 hover:text-white'
-                  }`}>
-                  <Lock className="w-4 h-4" />
-                  {txt.lockInternational}: {intlLockOn ? txt.locked : txt.unlocked}
-                </button>
-                <button onClick={saveLocks}
-                  className="px-4 py-2 rounded-xl bg-purple-500/12 border border-purple-400/20 text-purple-200 text-sm hover:bg-purple-500/20 transition-all">
-                  <Save className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </GlassCard>
+          )}
+        </GlassCard>
+      </BorderGlow>
     </motion.div>
   );
 }
