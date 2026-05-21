@@ -1268,7 +1268,7 @@ function AdminSection({ adminLoggedIn, setAdminLoggedIn, adminToken, setAdminTok
                 </div>
               )}
             </div>
-  </>
+      </>
           )}
 
           {adminTab === 'progress' && (
