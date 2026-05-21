@@ -248,7 +248,7 @@ function LockPopup({ show, locale, onClose }: { show: boolean; locale: Locale; o
 }
 
 const glassStyle: React.CSSProperties = {
-  background: 'rgba(20,20,30,0.45)',
+  background: 'rgba(255,255,255,0.06)',
   backdropFilter: 'blur(20px)',
   WebkitBackdropFilter: 'blur(20px)',
   border: '1px solid rgba(255,255,255,0.08)',
@@ -277,6 +277,11 @@ function App() {
   const [adminLoggedIn, setAdminLoggedIn] = useState(false);
   const [adminToken, setAdminToken] = useState('');
   const [selectedClient, setSelectedClient] = useState<Commission | null>(null);
+  const [customSlots, setCustomSlots] = useState(MAX_SLOTS);
+  const [cursorGlow, setCursorGlow] = useState({ x: 0, y: 0 });
+  const [titleTapCount, setTitleTapCount] = useState(0);
+  const [showWarning, setShowWarning] = useState(false);
+  const [profileRunaway, setProfileRunaway] = useState({ x: 0, y: 0 });
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchCommissions = useCallback(async (showLoading = true) => {
@@ -303,11 +308,13 @@ function App() {
       const photo = settingsArr.find((s: Setting) => s.key === 'profile_photo');
       const localLock = settingsArr.find((s: Setting) => s.key === 'local_locked');
       const intlLock = settingsArr.find((s: Setting) => s.key === 'international_locked');
+      const slots = settingsArr.find((s: Setting) => s.key === 'commission_slots');
       if (en?.value) setTermsEn(en.value);
       if (id?.value) setTermsId(id.value);
       if (photo?.value) setProfilePhoto(photo.value);
       if (localLock?.value !== undefined) setLocalLocked(localLock.value === 'true');
       if (intlLock?.value !== undefined) setInternationalLocked(intlLock.value === 'true');
+      if (slots?.value) setCustomSlots(Number(slots.value));
       setProfileLoaded(true);
     } catch {
       setProfileLoaded(true);
@@ -328,6 +335,12 @@ function App() {
     }
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [activeTab, fetchCommissions, fetchSettings]);
+
+  useEffect(() => {
+    const move = (e: MouseEvent) => setCursorGlow({ x: e.clientX, y: e.clientY });
+    window.addEventListener('mousemove', move);
+    return () => window.removeEventListener('mousemove', move);
+  }, []);
 
   useEffect(() => {
     if (activeTab === 'clients' || activeTab === 'admin') {
@@ -362,6 +375,9 @@ function App() {
 
   return (
     <div className="min-h-screen animated-bg text-white overflow-x-hidden relative selection:bg-purple-500/30">
+      <div className="cursor-glow" style={{ left: cursorGlow.x - 140, top: cursorGlow.y - 140 }} />
+      <div className="god-rays"></div>
+      <div className="light-particles"></div>
       <AuroraGlow />
       <StarParticles />
       <LockPopup show={lockPopupShow} locale={lockPopupLocale} onClose={() => setLockPopupShow(false)} />
@@ -380,7 +396,7 @@ function App() {
             <div className="flex items-center gap-4 md:gap-5">
               <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.4 }}
-                className="relative shrink-0">
+                className="relative shrink-0" onMouseEnter={() => setProfileRunaway({ x: (Math.random() - 0.5) * 140, y: (Math.random() - 0.5) * 90 })} style={{ transform: `translate(${profileRunaway.x}px, ${profileRunaway.y}px)`, transition: "0.25s ease" }}>
                 <div className="w-14 h-14 md:w-[72px] md:h-[72px] rounded-full overflow-hidden border-[2px] border-purple-400/40 shadow-[0_0_25px_rgba(168,85,247,0.3)] bg-[#0a0a0f] flex items-center justify-center breathe-glow profile-pulse">
                   {!profileLoaded ? (
                     <div className="w-5 h-5 border-2 border-purple-400/30 border-t-purple-400 rounded-full animate-spin" />
@@ -393,6 +409,15 @@ function App() {
               </motion.div>
 
               <motion.h1 className="text-3xl md:text-5xl font-bold tracking-tight"
+                onClick={() => {
+                  const next = titleTapCount + 1;
+                  setTitleTapCount(next);
+                  if (next >= 4) {
+                    setShowWarning(true);
+                    setTimeout(() => setShowWarning(false), 3500);
+                    setTitleTapCount(0);
+                  }
+                }}
                 initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.5 }}
                 style={{ textShadow: '0 0 30px rgba(168,85,247,0.15)' }}>
                 <span className="bg-gradient-to-r from-purple-300 via-violet-300 to-indigo-300 bg-clip-text text-transparent">
@@ -402,11 +427,12 @@ function App() {
             </div>
           </div>
 
+          <div className="commission-open-bubble">Commission Open!</div>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}
             className="mt-3 flex items-center justify-center gap-2">
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-400/20">
               <Users className="w-3 h-3 text-purple-300" />
-              <span className="text-xs text-purple-200 font-medium">{acceptedCount}/{MAX_SLOTS} {txt.slotsFilled}</span>
+              <span className="text-xs text-purple-200 font-medium">{acceptedCount}/{customSlots} {txt.slotsFilled}</span>
             </div>
             {localLocked && (
               <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-red-500/10 border border-red-400/20">
@@ -426,6 +452,12 @@ function App() {
             style={{ background: 'linear-gradient(90deg, transparent, rgba(168,85,247,0.3), rgba(139,92,246,0.2), transparent)' }}
             initial={{ width: 0, opacity: 0 }} animate={{ width: 140, opacity: 1 }} transition={{ duration: 1, delay: 0.8 }} />
         </motion.div>
+                {showWarning && (
+            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              className="fixed top-8 left-1/2 -translate-x-1/2 z-[999] px-5 py-3 rounded-2xl bg-red-500/20 border border-red-400/30 backdrop-blur-xl text-red-100 shadow-[0_0_30px_rgba(255,0,0,0.25)]">
+              ⚠ Hidden warning easter egg activated.
+            </motion.div>
+          )}
       </header>
 
       {/* Navigation */}
@@ -1125,7 +1157,7 @@ function AdminSection({ adminLoggedIn, setAdminLoggedIn, adminToken, setAdminTok
           <div className="flex gap-3 mb-6 flex-wrap">
             {[
               { key: 'clients' as const, label: 'Clients' },
-              { key: 'slots' as const, label: `Slots (${acceptedCount}/${MAX_SLOTS})` },
+              { key: 'slots' as const, label: `Slots (${acceptedCount}/${customSlots})` },
               { key: 'progress' as const, label: 'Progress' },
               { key: 'terms' as const, label: 'Terms' },
               { key: 'profile' as const, label: 'Profile' },
@@ -1180,9 +1212,33 @@ function AdminSection({ adminLoggedIn, setAdminLoggedIn, adminToken, setAdminTok
           )}
 
           {adminTab === 'slots' && (
+            <div className="mb-6 p-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl">
+              <label className="block text-sm mb-3 text-purple-200">Commission Slot Setting</label>
+              <div className="flex gap-3 items-center">
+                <input
+                  type="number"
+                  min="1"
+                  max="99"
+                  value={customSlots}
+                  onChange={(e) => setCustomSlots(Number(e.target.value))}
+                  className="px-4 py-3 rounded-xl bg-black/30 border border-white/10"
+                />
+                <button
+                  onClick={async () => {
+                    await apiFetch('/api/settings', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ key: 'commission_slots', value: String(customSlots) })
+                    });
+                  }}
+                  className="px-5 py-3 rounded-xl bg-purple-500/20 border border-purple-400/20">
+                  Save Slots
+                </button>
+              </div>
+            </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold text-purple-200">Accepted Clients ({acceptedCount}/{MAX_SLOTS})</h3>
+                <h3 className="text-sm font-bold text-purple-200">Accepted Clients ({acceptedCount}/{customSlots})</h3>
                 <div className="flex-1 mx-4 h-2 rounded-full bg-white/[0.06] overflow-hidden">
                   <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-violet-400" style={{ width: `${(acceptedCount / MAX_SLOTS) * 100}%` }} />
                 </div>
