@@ -889,6 +889,7 @@ function AdminSection({ adminLoggedIn, setAdminLoggedIn, adminToken, setAdminTok
   const [intlLockOn, setIntlLockOn] = useState(internationalLocked);
   const [lockSaved, setLockSaved] = useState(false);
   const [progressClient, setProgressClient] = useState<Commission | null>(null);
+  const [customSlots, setCustomSlots] = useState(MAX_SLOTS);
   const [progressValue, setProgressValue] = useState(0);
 
   useEffect(() => {
